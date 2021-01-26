@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网址缩短器</title>
+    <script>
+        function Base64() {
+         // private property
+         _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+         // public method for encoding
+         this.encode = function (input) {
+          var output = "";
+          var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+          var i = 0;
+          input = _utf8_encode(input);
+          while (i < input.length) {
+           chr1 = input.charCodeAt(i++);
+           chr2 = input.charCodeAt(i++);
+           chr3 = input.charCodeAt(i++);
+           enc1 = chr1 >> 2;
+           enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+           enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+           enc4 = chr3 & 63;
+           if (isNaN(chr2)) {
+            enc3 = enc4 = 64;
+           } else if (isNaN(chr3)) {
+            enc4 = 64;
+           }
+           output = output +
+           _keyStr.charAt(enc1) + _keyStr.charAt(enc2) +
+           _keyStr.charAt(enc3) + _keyStr.charAt(enc4);
+          }
+          return output;
+         }
+         // public method for decoding
+         this.decode = function (input) {
+          var output = "";
+          var chr1, chr2, chr3;
+          var enc1, enc2, enc3, enc4;
+          var i = 0;
+          input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+          while (i < input.length) {
+           enc1 = _keyStr.indexOf(input.charAt(i++));
+           enc2 = _keyStr.indexOf(input.charAt(i++));
+           enc3 = _keyStr.indexOf(input.charAt(i++));
+           enc4 = _keyStr.indexOf(input.charAt(i++));
+           chr1 = (enc1 << 2) | (enc2 >> 4);
+           chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+           chr3 = ((enc3 & 3) << 6) | enc4;
+           output = output + String.fromCharCode(chr1);
+           if (enc3 != 64) {
+            output = output + String.fromCharCode(chr2);
+           }
+           if (enc4 != 64) {
+            output = output + String.fromCharCode(chr3);
+           }
+          }
+          output = _utf8_decode(output);
+          return output;
+         }
+         // private method for UTF-8 encoding
+         _utf8_encode = function (string) {
+          string = string.replace(/\r\n/g,"\n");
+          var utftext = "";
+          for (var n = 0; n < string.length; n++) {
+           var c = string.charCodeAt(n);
+           if (c < 128) {
+            utftext += String.fromCharCode(c);
+           } else if((c > 127) && (c < 2048)) {
+            utftext += String.fromCharCode((c >> 6) | 192);
+            utftext += String.fromCharCode((c & 63) | 128);
+           } else {
+            utftext += String.fromCharCode((c >> 12) | 224);
+            utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+            utftext += String.fromCharCode((c & 63) | 128);
+           }
+          }
+          return utftext;
+         }
+         // private method for UTF-8 decoding
+         _utf8_decode = function (utftext) {
+          var string = "";
+          var i = 0;
+          var c = c1 = c2 = 0;
+          while ( i < utftext.length ) {
+           c = utftext.charCodeAt(i);
+           if (c < 128) {
+            string += String.fromCharCode(c);
+            i++;
+           } else if((c > 191) && (c < 224)) {
+            c2 = utftext.charCodeAt(i+1);
+            string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+            i += 2;
+           } else {
+            c2 = utftext.charCodeAt(i+1);
+            c3 = utftext.charCodeAt(i+2);
+            string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+            i += 3;
+           }
+          }
+          return string;
+         }
+        }
+        function checkURL(str_url) {
+            var reg = /[a-zA-z]+:\/\/[^\s]*/
+            
+            return reg.test(str_url)
+        }
+        function getDomain(URL){
+            var domain = URL.split('/');
+            if(domain[2]){
+                return domain[2];
+            }
+        }
+        function create(){
+            if(checkURL(document.getElementById("url").value.toString())==true){
+                $.ajax({
+                    type : "GET",
+                    url : "create.php",
+                    data : {
+                        url : new Base64().encode(document.getElementById("url").value.toString()),
+                    },
+                    success : function(result) {
+                    document.getElementById("hint").style.color="#000000";
+                        document.getElementById("hint").innerHTML="短网址：<a id='Link' href='"+result.short_url+"' target='_blank'>"+result.short_url+"</a>";
+                    },
+                });
+            }else{
+                document.getElementById("hint").style.color="red";
+                document.getElementById("hint").innerHTML="网址不合法";
+            }
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica';
+        }
+
+        header {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 2.5vw;
+            position: relative;
+        }
+
+        ul,li {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        header > ul > li {
+            position: absolute;
+            font-size: 20px;
+            margin-top: 10px;
+            line-height: 2.5vw;
+            color: #778899;
+        }
+
+        #title {
+            margin-left: 8.1vw;
+        }
+
+        #footerLink , #footerLink:link , #footerLink:visited , #footerLink:hover , #footerLink:active {
+            text-decoration:none;
+            color:#778899;
+        }
+        
+        #Link , #Link:link , #Link:visited , #Link:hover , #Link:active {
+            text-decoration:none;
+            color:#40E0D0;
+        }
+
+
+        #shortener {
+            margin: 0;
+            padding: 0;
+            margin-top: 20px;
+            background-color: rgb(84, 127, 207);
+            height: calc(100vh - 5vw - 20px);
+        }
+
+        #url {
+            margin-left: 15vw;
+            height: 25px;
+            width: 40vw;
+            outline: none;
+            margin-top: 10px;
+            border-radius: 5px;
+            color: #000000;
+            background-color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        #submit {
+            width: 65px;
+            height: 30px;
+            color: #000000;
+            background-color: #ffffff;
+            border-color: #ffffff;
+            outline: none;
+        }
+
+        #mainTitle {
+            margin-left: 15vw;
+            color: #ffffff;
+            font-size: 30px;
+        }
+
+        #hint {
+            margin-left: 15vw;
+        }
+        footer {
+            margin: 0;
+            padding: 0;
+            height: 2.5vw;
+        }
+
+        footer > span {
+            font-size: auto;
+            line-height: 2.5vw;
+            margin-left: 10px;
+        }
+
+        #shorturl {
+            position: relative;
+            top: 50%; /*偏移*/
+            position: relative;
+            top: 50%; /*偏移*/
+            transform: translateY(-125%);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+</head>
+<body>
+    <header>
+        <ul>
+            <li id="title">网址缩短器</li>
+        </ul>
+    </header>
+    <main>
+        <div id="shortener">
+            <br />
+            <div id="shorturl">
+            <span id="mainTitle">缩短您的网址：</span>
+            <form>
+                <input type="text" name="url" id="url">
+                <button type="button" id="submit" onclick="create()">缩短网址</button><br />
+                <span id="hint"></span>
+            </form>
+        </div>
+        </div>
+    </main>
+    <footer>
+        <span>© <a id="footerLink" href="https://www.example.com" target="_blank">版权声明</a></span>
+    </footer>
+</body>
+</html>
