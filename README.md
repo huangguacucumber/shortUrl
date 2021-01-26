@@ -9,6 +9,8 @@
 2. Modify your domain name, database address, database user name and database password.
 3. 修改您网站的伪静态。我们已经为您准备好了。它在".htaccess"内。
 3. Modify the rewrite of your website. We have prepared it for you. It is in ".htaccess".
+4. 创建名为"short_url"的Mysql数据库，并导入我们为您准备好的"short_url.sql"文件
+4. Create a Mysql database named "short_url" and import the "short_url.sql" file we prepared for you
 ## 好了，接着您只需要运行您的服务即可开始。
 ## Well, then you just need to run your service to start.
 ### demo: [cuc.im(中文)](https://cuc.im)
